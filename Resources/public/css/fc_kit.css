@@ -1,0 +1,26 @@
+/* Kit FC */
+.fc-kit {
+    background-color: #0e6eb8;
+    padding: 25px;
+    top: 0px;
+    margin-bottom: 2em;
+}
+
+.fc-kit #fconnect-profile a::after {
+    content: '';
+    margin-left: 5px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 5px 0 5px;
+    border-color: #ffffff transparent transparent transparent;
+    line-height: 0px;
+    _filter: progid:DXImageTransform.Microsoft.Chroma(color='#ffffff');
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+}

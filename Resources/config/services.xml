@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://symfony.com/schema/dic/services"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="france_connect.service.context" class="KleeGroup\FranceConnectBundle\Manager\ContextService" public="true">
+            <argument type="service" id="session"/>
+            <argument type="service" id="logger"/>
+            <argument id="clientId">%france_connect.client_id%</argument>
+            <argument id="clientSecret">%france_connect.client_secret%</argument>
+            <argument id="fcBaseUrl">%france_connect.provider_base_url%</argument>
+            <argument id="scopes">%france_connect.scopes%</argument>
+            <argument id="callbackUrl">%france_connect.callback_url%</argument>
+            <argument id="callbackUrl">%france_connect.logout_url%</argument>
+        </service>
+
+    </services>
+
+
+</container>
