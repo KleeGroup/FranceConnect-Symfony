@@ -6,7 +6,7 @@ Symfony 3 Bundle for FranceConnect authentication.
 
 ## Dependencies
 
-* [namshi/jose](https://github.com/namshi/jose])
+* [namshi/jose](https://github.com/namshi/jose)
 
 ## Installation
 
