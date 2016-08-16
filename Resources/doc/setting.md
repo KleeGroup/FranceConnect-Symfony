@@ -3,7 +3,7 @@ Step 1: Setting up the bundle
 ### 1) Add FranceConnectBundle to your project
 
 ```bash
-composer require kleegroup/france-connect
+composer require kleegroup/franceconnect-bundle
 ```
 
 ### 2) Enable the bundle
