@@ -56,6 +56,11 @@ class ContextService implements ContextServiceInterface
     private $logoutUrl;
     
     /**
+     * @var string proxy
+     */
+    private $proxy;
+    
+    /**
      * ContextService constructor.
      *
      * @param SessionInterface $session      session manager
@@ -68,8 +73,9 @@ class ContextService implements ContextServiceInterface
      * @param                  $logoutUrl    logout URL
      */
     public function __construct(SessionInterface $session, LoggerInterface $logger, $clientId,
-                                $clientSecret, $fcBaseUrl, array $scopes, $callbackUrl, $logoutUrl)
+                                $clientSecret, $fcBaseUrl, array $scopes, $callbackUrl, $logoutUrl, $proxy)
     {
+        var_dump($proxy);
         $this->session = $session;
         $this->logger = $logger;
         $this->clientId = $clientId;
@@ -78,6 +84,7 @@ class ContextService implements ContextServiceInterface
         $this->scopes = $scopes;
         $this->callbackUrl = $callbackUrl;
         $this->logoutUrl = $logoutUrl;
+        $this->proxy = $proxy;
     }
     
     /**
@@ -169,7 +176,7 @@ class ContextService implements ContextServiceInterface
     private function getAccessToken($code)
     {
         $this->logger->debug('Get Access Token.');
-        $curlWrapper = new CurlWrapper();
+        $curlWrapper = new CurlWrapper($this->proxy);
         $post_data = [
             "grant_type"    => "authorization_code",
             "code"          => $code,
@@ -229,7 +236,7 @@ class ContextService implements ContextServiceInterface
     private function getInfos($accessToken)
     {
         $this->logger->debug('Get Infos.');
-        $curlWrapper = new CurlWrapper();
+        $curlWrapper = new CurlWrapper($this->proxy);
         $curlWrapper->addHeader("Authorization", "Bearer $accessToken");
         $userInfoUrl = $this->fcBaseUrl . "userinfo";
         $result = $curlWrapper->get($userInfoUrl);

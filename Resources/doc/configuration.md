@@ -13,6 +13,9 @@ france_connect:
     # FranceConnect base URL
     provider_base_url: 'https://fcp.integ01.dev-franceconnect.fr/api/v1/'
     
+    #proxy (optional)
+    proxy_host: 'XXX.XXX.XXX.XXX:XXXX'
+    
     # Callback URL provided to FranceConnect
     callback_url: 'http://127.0.0.1:8000/france-connect/callback'
     

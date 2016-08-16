@@ -23,12 +23,17 @@ class CurlWrapper
 
     private $postFileProperties;
 
-    public function __construct()
+    public function __construct($proxy = null)
     {
         $this->curlHandle = curl_init();
         $this->setProperties(CURLOPT_RETURNTRANSFER, 1);
         $this->setProperties(CURLOPT_FOLLOWLOCATION, 1);
         $this->setProperties(CURLOPT_MAXREDIRS, 5);
+        if(!empty($proxy))
+        {
+            $this->setProperties(CURLOPT_HTTPPROXYTUNNEL, 1);
+            $this->setProperties(CURLOPT_PROXY, $proxy);
+        }
         $this->postFile = array();
         $this->postData = array();
         curl_setopt($this->curlHandle, CURLOPT_SSL_VERIFYPEER, true);

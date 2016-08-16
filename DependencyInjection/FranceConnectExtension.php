@@ -34,5 +34,6 @@ class FranceConnectExtension extends Extension
         $container->setParameter('france_connect.logout_url', $config['post_logout_redirect_uri']);
         $container->setParameter('france_connect.scopes', $config['scopes']);
         $container->setParameter('france_connect.result_route', $config['result_route']);
+        $container->setParameter('france_connect.proxy', $config['proxy_host']);
     }
 }

@@ -14,7 +14,8 @@
             <argument id="fcBaseUrl">%france_connect.provider_base_url%</argument>
             <argument id="scopes">%france_connect.scopes%</argument>
             <argument id="callbackUrl">%france_connect.callback_url%</argument>
-            <argument id="callbackUrl">%france_connect.logout_url%</argument>
+            <argument id="logoutUrl">%france_connect.logout_url%</argument>
+            <argument id="proxy">%france_connect.proxy%</argument>
         </service>
 
     </services>

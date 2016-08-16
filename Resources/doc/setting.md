@@ -22,4 +22,13 @@ public function registerBundles()
 }
 ```
 
+### 3) Import routes
+
+``` yaml
+france_connect:
+    resource: "@FranceConnectBundle/Controller/"
+    type:     annotation
+    prefix:   /
+``` 
+
 [Step 2: Configuration](configuration.md)

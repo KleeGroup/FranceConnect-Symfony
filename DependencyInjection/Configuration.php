@@ -69,6 +69,11 @@ class Configuration implements ConfigurationInterface
                     ->thenInvalid("%s is not a valid URL.")
                 ->end()
             ->end()
+    
+            ->scalarNode('proxy_host')
+                ->info('Proxy.')
+                ->treatNullLike('')
+            ->end()
             ->scalarNode('post_logout_redirect_uri')
                 ->info('POST LOGOUT REDIRECT URI used by FranceConnect.')
                 ->isRequired()
