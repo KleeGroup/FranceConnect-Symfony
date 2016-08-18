@@ -4,30 +4,19 @@ FranceConnectBundle Configuration Reference
 All available configuration options are listed below with their default values.
 
 ``` yaml
-# app/config/config.yml
 france_connect:
-    # Identifiers supplied by FranceConnect.
-    client_id: '11111'
-    client_secret: '111111'
-    
-    # FranceConnect base URL
+    #Ids
+    client_id: 'b8a8fdf9fe4e6f469086e825c21aed3116b9cc3eafe90a4c553678c92bdc9835'
+    client_secret: 'f2fa587128d3fa75167a79327bdd4ebaf5db6b60aeadd8ea173631879697100b'
+    #FranceConnect base URL
     provider_base_url: 'https://fcp.integ01.dev-franceconnect.fr/api/v1/'
-    
-    #proxy (optional)
-    proxy_host: 'XXX.XXX.XXX.XXX:XXXX'
-    
-    # Callback URL provided to FranceConnect
-    callback_url: 'http://127.0.0.1:8000/france-connect/callback'
-    
-    # Logout URL
-    post_logout_redirect_uri : 'http://127.0.0.1:8000/home'
-    
-    # Data to recover
-    # this parameter is optional
+    #route name for logout
+    post_logout_route: 'app_default_default'
+    result_route: 'app_default_franceconnect'
+    proxy_host: '172.20.0.9:3128'
+    # data
     scopes:
         - 'openid'
         - 'profile'
-        
-    # The route name on which the treatment of json be made.
-    result_route: 'app.retour_fc'
+    
 ```

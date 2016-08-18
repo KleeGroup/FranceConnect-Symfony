@@ -9,6 +9,9 @@ use KleeGroup\FranceConnectBundle\Manager\Exception\SecurityException;
 use Namshi\JOSE\SimpleJWS;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
 
 
 /**
@@ -63,27 +66,38 @@ class ContextService implements ContextServiceInterface
     /**
      * ContextService constructor.
      *
-     * @param SessionInterface $session      session manager
-     * @param LoggerInterface  $logger       logger
-     * @param                  $clientId     service identifier
-     * @param                  $clientSecret secret service identifier
-     * @param                  $fcBaseUrl    FranceConnect base URL
-     * @param array            $scopes       scopes
-     * @param                  $callbackUrl  URL callback
-     * @param                  $logoutUrl    logout URL
+     * @param SessionInterface $session   session manager
+     * @param LoggerInterface  $logger    logger
+     * @param                  $clientId  service identifier
+     * @param                  $clientSecret
+     * @param                  $fcBaseUrl FranceConnect base URL
+     * @param array            $scopes    scopes
+     * @param                  $proxy     proxy
      */
-    public function __construct(SessionInterface $session, LoggerInterface $logger, $clientId,
-                                $clientSecret, $fcBaseUrl, array $scopes, $callbackUrl, $logoutUrl, $proxy)
-    {
-        var_dump($proxy);
+    public function __construct(
+        SessionInterface $session,
+        LoggerInterface $logger,
+        RouterInterface $router,
+        $clientId,
+        $clientSecret,
+        $fcBaseUrl,
+        array $scopes,
+        $proxy,
+        $callbackRoute,
+        $logoutRoute
+    ) {
         $this->session = $session;
         $this->logger = $logger;
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
         $this->fcBaseUrl = $fcBaseUrl;
         $this->scopes = $scopes;
-        $this->callbackUrl = $callbackUrl;
-        $this->logoutUrl = $logoutUrl;
+        try {
+            $this->logoutUrl = $router->generate($logoutRoute, [],UrlGeneratorInterface::ABSOLUTE_URL );
+            $this->callbackUrl = $router->generate($callbackRoute, [],UrlGeneratorInterface::ABSOLUTE_URL );
+        } catch (RouteNotFoundException $ex) {
+            throw new InvalidArgumentException("Route name is invalid", $ex);
+        }
         $this->proxy = $proxy;
     }
     
@@ -103,10 +117,10 @@ class ContextService implements ContextServiceInterface
             'scope'         => implode(' ', $this->scopes),
             'redirect_uri'  => $this->callbackUrl,
             'nonce'         => $this->session->get(self::OPENID_SESSION_NONCE),
-            'state'         => urlencode('token={' . $this->session->get(self::OPENID_SESSION_TOKEN) . '}'),
+            'state'         => urlencode('token={'.$this->session->get(self::OPENID_SESSION_TOKEN).'}'),
         ];
         
-        return $this->fcBaseUrl . 'authorize?' . http_build_query($params);
+        return $this->fcBaseUrl.'authorize?'.http_build_query($params);
     }
     
     /**
@@ -131,8 +145,10 @@ class ContextService implements ContextServiceInterface
     {
         $this->logger->debug('Get User Info.');
         if (array_key_exists("error", $params)) {
-            $this->logger->error($params["error"] . array_key_exists("error_description", $params) ? $params["error_description"] : '');
-            throw new Exception('FranceConnect error => ' . $params["error"]);
+            $this->logger->error(
+                $params["error"].array_key_exists("error_description", $params) ? $params["error_description"] : ''
+            );
+            throw new Exception('FranceConnect error => '.$params["error"]);
         }
         
         $this->verifyState($params['state']);
@@ -187,18 +203,21 @@ class ContextService implements ContextServiceInterface
         
         $this->logger->debug('POST Data to FranceConnect.');
         $curlWrapper->setPostDataUrlEncode($post_data);
-        $token_url = $this->fcBaseUrl . 'token';
+        $token_url = $this->fcBaseUrl.'token';
         $result = $curlWrapper->get($token_url);
         
         // check status code
         if ($curlWrapper->getHTTPCode() != 200) {
             if (!$result) {
-                $this->logger->error("Curl Error : " . $curlWrapper->getLastError());
+                $this->logger->error("Curl Error : ".$curlWrapper->getLastError());
                 throw new Exception($curlWrapper->getLastError());
             }
             $result_array = json_decode($result, true);
-            $this->logger->error($result_array["error"] . array_key_exists("error_description", $result_array) ? $result_array["error_description"] : '');
-            throw new Exception("FranceConnect Error => " . $result_array['error']);
+            $description = array_key_exists("error_description",$result_array) ? $result_array["error_description"] : '';
+            $this->logger->error(
+                $result_array["error"] . $description
+            );
+            throw new Exception("FranceConnect Error => ".$result_array['error']);
         }
         
         $result_array = json_decode($result, true);
@@ -238,7 +257,7 @@ class ContextService implements ContextServiceInterface
         $this->logger->debug('Get Infos.');
         $curlWrapper = new CurlWrapper($this->proxy);
         $curlWrapper->addHeader("Authorization", "Bearer $accessToken");
-        $userInfoUrl = $this->fcBaseUrl . "userinfo";
+        $userInfoUrl = $this->fcBaseUrl."userinfo";
         $result = $curlWrapper->get($userInfoUrl);
         
         if ($curlWrapper->getHTTPCode() != 200) {
@@ -249,7 +268,7 @@ class ContextService implements ContextServiceInterface
                 $messageErreur = $result_array['error'];
             }
             $this->logger->error($messageErreur);
-            throw new Exception("Erreur lors de la récupération des infos sur le serveur OpenID : " . $messageErreur);
+            throw new Exception("Erreur lors de la récupération des infos sur le serveur OpenID : ".$messageErreur);
         }
         
         return json_decode($result, true);
@@ -269,7 +288,7 @@ class ContextService implements ContextServiceInterface
         $this->logger->debug('Remove session token');
         $this->session->set(self::OPENID_SESSION_TOKEN, $this->getRandomToken());
         
-        return $this->fcBaseUrl . 'logout?' . http_build_query($params);
+        return $this->fcBaseUrl.'logout?'.http_build_query($params);
     }
     
 }

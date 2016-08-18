@@ -9,22 +9,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 /**
  *  Configuraiton of FranceConnect Bundle.
  *
- * <b>Example:</b>
- *
- *  # Configuration FranceConnectBundle
- *   france_connect:
- *   #Ids
- *   client_id: 'b8a8fdf9fe4e6f469086e825c21aed3116b9cc3eafe90a4c553678c92bdc9835'
- *   client_secret: 'f2fa587128d3fa75167a79327bdd4ebaf5db6b60aeadd8ea173631879697100b'
- *   #FranceConnect base URL
- *   provider_base_url: 'https://fcp.integ01.dev-franceconnect.fr/api/v1/'
- *   # Callback URL
- *   callback_url: 'http://127.0.0.1/login_fc'
- *   # data
- *   scopes:
- *   - 'openid'
- *   - 'profile'
- *   result_route: 'app.retour_fc'
  */
 class Configuration implements ConfigurationInterface
 {
@@ -58,32 +42,14 @@ class Configuration implements ConfigurationInterface
                     ->thenInvalid("%s is not a valid URL. The URL must end with a slash")
                 ->end()
             ->end()
-            ->scalarNode('callback_url')
-                ->info('Callback url used by FranceConnect.')
-                ->isRequired()
-                ->cannotBeEmpty()
-                ->validate()
-                    ->ifTrue(function ($value) {
-                        return !filter_var($value, FILTER_VALIDATE_URL);
-                    })
-                    ->thenInvalid("%s is not a valid URL.")
-                ->end()
-            ->end()
-    
             ->scalarNode('proxy_host')
                 ->info('Proxy.')
                 ->treatNullLike('')
             ->end()
-            ->scalarNode('post_logout_redirect_uri')
-                ->info('POST LOGOUT REDIRECT URI used by FranceConnect.')
+            ->scalarNode('post_logout_route')
+                ->info('Post logout route redirect used by FranceConnect.')
                 ->isRequired()
                 ->cannotBeEmpty()
-                ->validate()
-                    ->ifTrue(function ($value) {
-                        return !filter_var($value, FILTER_VALIDATE_URL);
-                    })
-                     ->thenInvalid("%s is not a valid URL.")
-                ->end()
             ->end()
             ->arrayNode('scopes')
                 ->info('Scopes desired.')

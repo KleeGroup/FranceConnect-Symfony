@@ -9,13 +9,14 @@
         <service id="france_connect.service.context" class="KleeGroup\FranceConnectBundle\Manager\ContextService" public="true">
             <argument type="service" id="session"/>
             <argument type="service" id="logger"/>
+            <argument type="service" id="router"/>
             <argument id="clientId">%france_connect.client_id%</argument>
             <argument id="clientSecret">%france_connect.client_secret%</argument>
             <argument id="fcBaseUrl">%france_connect.provider_base_url%</argument>
             <argument id="scopes">%france_connect.scopes%</argument>
-            <argument id="callbackUrl">%france_connect.callback_url%</argument>
-            <argument id="logoutUrl">%france_connect.logout_url%</argument>
             <argument id="proxy">%france_connect.proxy%</argument>
+            <argument id="callbackRoute">%france_connect.callback_route%</argument>
+            <argument id="logoutRoute">%france_connect.logout_route%</argument>
         </service>
 
     </services>

@@ -18,7 +18,7 @@ class FranceConnectController extends Controller
 {
 
     /**
-     * @Route("/login_fc", name="france_connect_login", methods="GET")
+     * @Route("/login_fc", methods="GET")
      */
     public function loginAction(Request $request)
     {
@@ -29,7 +29,7 @@ class FranceConnectController extends Controller
     }
 
     /**
-     * @Route("/callback", name="callback", methods="GET")
+     * @Route("/callback", methods="GET")
      */
     public function checkAction(Request $request)
     {
@@ -37,12 +37,12 @@ class FranceConnectController extends Controller
         $logger->debug('Callback intercept.');
         $getParams  = $request->query->all();
         $json       = $this->get('france_connect.service.context')->getUserInfo($getParams);
-        $route_name = $this->getParameter('france_connect.result_route');
+        $route_name = $this->getParameter('france_connect.result');
         return $this->redirectToRoute($route_name, ['json'=>urlencode($json)]);
     }
 
     /**
-     * @Route("/logout_fc", name="france_connect_logout")
+     * @Route("/logout_fc")
      */
     public function logoutAction()
     {
