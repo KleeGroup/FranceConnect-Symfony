@@ -286,7 +286,7 @@ class ContextService implements ContextServiceInterface
         ];
         
         $this->logger->debug('Remove session token');
-        $this->session->set(self::OPENID_SESSION_TOKEN, $this->getRandomToken());
+        $this->session->clear();
         
         return $this->fcBaseUrl.'logout?'.http_build_query($params);
     }
