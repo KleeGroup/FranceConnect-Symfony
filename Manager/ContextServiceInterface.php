@@ -10,6 +10,7 @@ namespace KleeGroup\FranceConnectBundle\Manager;
 
 /**
  * Interface ContextServiceInterface
+ *
  * @package KleeGroup\FranceConnectBundle\Service
  */
 interface ContextServiceInterface
@@ -21,10 +22,13 @@ interface ContextServiceInterface
      * @return string
      */
     public function generateAuthorizationURL();
-
+    
     /**
+     *
      * Returns data provided by FranceConnect.
+     *
      * @param array $params query string parameters
+     *
      * @return string json
      */
     public function getUserInfo(array $params);

@@ -9,8 +9,8 @@ use KleeGroup\FranceConnectBundle\Manager\Exception\SecurityException;
 use Namshi\JOSE\SimpleJWS;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 
 
@@ -23,7 +23,7 @@ class ContextService implements ContextServiceInterface
 {
     const OPENID_SESSION_TOKEN = "open_id_session_token";
     const OPENID_SESSION_NONCE = "open_id_session_nonce";
-    const ID_TOKEN_HINT = "open_id_token_hint";
+    const ID_TOKEN_HINT        = "open_id_token_hint";
     
     /**
      * @var SessionInterface session manager
@@ -68,11 +68,11 @@ class ContextService implements ContextServiceInterface
      *
      * @param SessionInterface $session   session manager
      * @param LoggerInterface  $logger    logger
-     * @param                  $clientId  service identifier
-     * @param                  $clientSecret
-     * @param                  $fcBaseUrl FranceConnect base URL
+     * @param string           $clientId  service identifier
+     * @param string           $clientSecret
+     * @param string           $fcBaseUrl FranceConnect base URL
      * @param array            $scopes    scopes
-     * @param                  $proxy     proxy
+     * @param string           $proxy     proxy
      */
     public function __construct(
         SessionInterface $session,
@@ -93,8 +93,8 @@ class ContextService implements ContextServiceInterface
         $this->fcBaseUrl = $fcBaseUrl;
         $this->scopes = $scopes;
         try {
-            $this->logoutUrl = $router->generate($logoutRoute, [],UrlGeneratorInterface::ABSOLUTE_URL );
-            $this->callbackUrl = $router->generate($callbackRoute, [],UrlGeneratorInterface::ABSOLUTE_URL );
+            $this->logoutUrl = $router->generate($logoutRoute, [], UrlGeneratorInterface::ABSOLUTE_URL);
+            $this->callbackUrl = $router->generate($callbackRoute, [], UrlGeneratorInterface::ABSOLUTE_URL);
         } catch (RouteNotFoundException $ex) {
             throw new InvalidArgumentException("Route name is invalid", $ex);
         }
@@ -107,8 +107,8 @@ class ContextService implements ContextServiceInterface
     public function generateAuthorizationURL()
     {
         $this->logger->debug('Set session tokens');
-        $this->session->set(self::OPENID_SESSION_TOKEN, $this->getRandomToken());
-        $this->session->set(self::OPENID_SESSION_NONCE, $this->getRandomToken());
+        $this->session->set(static::OPENID_SESSION_TOKEN, $this->getRandomToken());
+        $this->session->set(static::OPENID_SESSION_NONCE, $this->getRandomToken());
         
         $this->logger->debug('Generate Query String.');
         $params = [
@@ -116,8 +116,8 @@ class ContextService implements ContextServiceInterface
             'client_id'     => $this->clientId,
             'scope'         => implode(' ', $this->scopes),
             'redirect_uri'  => $this->callbackUrl,
-            'nonce'         => $this->session->get(self::OPENID_SESSION_NONCE),
-            'state'         => urlencode('token={'.$this->session->get(self::OPENID_SESSION_TOKEN).'}'),
+            'nonce'         => $this->session->get(static::OPENID_SESSION_NONCE),
+            'state'         => urlencode('token={'.$this->session->get(static::OPENID_SESSION_TOKEN).'}'),
         ];
         
         return $this->fcBaseUrl.'authorize?'.http_build_query($params);
@@ -137,6 +137,7 @@ class ContextService implements ContextServiceInterface
      * Returns data provided by FranceConnect.
      *
      * @param array $params query string parameter
+     *
      * @return string data provided by FranceConnect (json)
      * @throws Exception General exception
      * @throws SecurityException An exception may be thrown if a security check has failed
@@ -163,6 +164,7 @@ class ContextService implements ContextServiceInterface
      * Check state parameter for security reason.
      *
      * @param $state
+     *
      * @throws SecurityException
      */
     private function verifyState($state)
@@ -175,7 +177,7 @@ class ContextService implements ContextServiceInterface
         $token = preg_replace('~{~', '', $token, 1);
         $token = preg_replace('~}~', '', $token, 1);
         
-        if ($token != $this->session->get(self::OPENID_SESSION_TOKEN)) {
+        if ($token != $this->session->get(static::OPENID_SESSION_TOKEN)) {
             $this->logger->error('The value of the parameter STATE is not equal to the one which is expected');
             throw new SecurityException("The token is invalid.");
         }
@@ -184,7 +186,8 @@ class ContextService implements ContextServiceInterface
     /**
      * Get Access Token.
      *
-     * @param string authorization code
+     * @param string $code authorization code
+     *
      * @return string access token
      * @throws SecurityException
      * @throws Exception
@@ -213,22 +216,25 @@ class ContextService implements ContextServiceInterface
                 throw new Exception($curlWrapper->getLastError());
             }
             $result_array = json_decode($result, true);
-            $description = array_key_exists("error_description",$result_array) ? $result_array["error_description"] : '';
+            $description = array_key_exists(
+                "error_description",
+                $result_array
+            ) ? $result_array["error_description"] : '';
             $this->logger->error(
-                $result_array["error"] . $description
+                $result_array["error"].$description
             );
             throw new Exception("FranceConnect Error => ".$result_array['error']);
         }
         
         $result_array = json_decode($result, true);
         $id_token = $result_array['id_token'];
-        $this->session->set(self::ID_TOKEN_HINT, $id_token);
+        $this->session->set(static::ID_TOKEN_HINT, $id_token);
         $all_part = explode(".", $id_token);
         $header = json_decode(base64_decode($all_part[0]), true);
         $payload = json_decode(base64_decode($all_part[1]), true);
         
         // check nonce parameter
-        if ($payload['nonce'] != $this->session->get(self::OPENID_SESSION_NONCE)) {
+        if ($payload['nonce'] != $this->session->get(static::OPENID_SESSION_NONCE)) {
             $this->logger->error('The value of the parameter NONCE is not equal to the one which is expected');
             throw new SecurityException("The nonce parameter is invalid");
         }
@@ -240,7 +246,7 @@ class ContextService implements ContextServiceInterface
             throw new SecurityException("JWS is invalid");
         }
         
-        $this->session->remove(self::OPENID_SESSION_NONCE);
+        $this->session->remove(static::OPENID_SESSION_NONCE);
         
         return $result_array['access_token'];
     }
@@ -249,6 +255,7 @@ class ContextService implements ContextServiceInterface
      * Last call to FranceConnect to get data.
      *
      * @param $accessToken
+     *
      * @return mixed
      * @throws Exception
      */
@@ -262,7 +269,7 @@ class ContextService implements ContextServiceInterface
         
         if ($curlWrapper->getHTTPCode() != 200) {
             if (!$result) {
-                $messageErreur = $this->curlWrapper->getLastError();
+                $messageErreur = $curlWrapper->getLastError();
             } else {
                 $result_array = json_decode($result, true);
                 $messageErreur = $result_array['error'];
@@ -282,7 +289,7 @@ class ContextService implements ContextServiceInterface
         $this->logger->debug('Generate Query String.');
         $params = [
             'post_logout_redirect_uri' => $this->logoutUrl,
-            'id_token_hint'            => $this->session->get(self::ID_TOKEN_HINT),
+            'id_token_hint'            => $this->session->get(static::ID_TOKEN_HINT),
         ];
         
         $this->logger->debug('Remove session token');
