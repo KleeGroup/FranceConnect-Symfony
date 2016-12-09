@@ -4,14 +4,20 @@ namespace KleeGroup\FranceConnectBundle\Manager;
 
 
 use KleeGroup\FranceConnectBundle\Manager\Exception\Exception;
-use KleeGroup\FranceConnectBundle\Manager\Exception\InvalidArgumentException;
 use KleeGroup\FranceConnectBundle\Manager\Exception\SecurityException;
+use KleeGroup\FranceConnectBundle\Security\Core\Authentication\Token\FranceConnectToken;
+use KleeGroup\FranceConnectBundle\Security\Core\Authorization\Voter\FranceConnectAuthenticatedVoter;
 use Namshi\JOSE\SimpleJWS;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
+use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
 
 
 /**
@@ -59,9 +65,29 @@ class ContextService implements ContextServiceInterface
     private $logoutUrl;
     
     /**
-     * @var string proxy
+     * @var string proxy host
      */
-    private $proxy;
+    private $proxyHost;
+    
+    /**
+     * @var int proxy port
+     */
+    private $proxyPort;
+    
+    /**
+     * @var TokenStorageInterface
+     */
+    private $tokenStorage;
+    
+    /**
+     * @var SessionAuthenticationStrategyInterface
+     */
+    private $sessionStrategy;
+    
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
     
     /**
      * ContextService constructor.
@@ -73,16 +99,21 @@ class ContextService implements ContextServiceInterface
      * @param string           $fcBaseUrl FranceConnect base URL
      * @param array            $scopes    scopes
      * @param string           $proxy     proxy
+     * @param string           $proxyPort proxyPort
      */
     public function __construct(
         SessionInterface $session,
         LoggerInterface $logger,
         RouterInterface $router,
+        SessionAuthenticationStrategyInterface $sessionStrategy,
+        TokenStorageInterface $tokenStorage,
+        RequestStack $requestStack,
         $clientId,
         $clientSecret,
         $fcBaseUrl,
         array $scopes,
-        $proxy,
+        string $proxy,
+        int $proxyPort,
         $callbackRoute,
         $logoutRoute
     ) {
@@ -93,12 +124,17 @@ class ContextService implements ContextServiceInterface
         $this->fcBaseUrl = $fcBaseUrl;
         $this->scopes = $scopes;
         try {
+            // ensure route exist
             $this->logoutUrl = $router->generate($logoutRoute, [], UrlGeneratorInterface::ABSOLUTE_URL);
             $this->callbackUrl = $router->generate($callbackRoute, [], UrlGeneratorInterface::ABSOLUTE_URL);
         } catch (RouteNotFoundException $ex) {
-            throw new InvalidArgumentException("Route name is invalid", $ex);
+            throw new Exception("Route name is invalid", $ex);
         }
-        $this->proxy = $proxy;
+        $this->proxyPort = $proxyPort;
+        $this->proxyHost = $proxy;
+        $this->tokenStorage = $tokenStorage;
+        $this->sessionStrategy = $sessionStrategy;
+        $this->requestStack = $requestStack;
     }
     
     /**
@@ -155,7 +191,16 @@ class ContextService implements ContextServiceInterface
         $this->verifyState($params['state']);
         $accessToken = $this->getAccessToken($params['code']);
         $userInfo = $this->getInfos($accessToken);
-        $user_info['access_token'] = $accessToken;
+        $userInfo['access_token'] = $accessToken;
+    
+        $token = new FranceConnectToken($userInfo, [FranceConnectAuthenticatedVoter::IS_FRANCE_CONNECT_AUTHENTICATED, AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY]);
+        $request = $this->requestStack->getCurrentRequest();
+    
+        if (null !== $request) {
+            $this->sessionStrategy->onAuthentication($request, $token);
+        }
+    
+        $this->tokenStorage->setToken($token);
         
         return json_encode($userInfo, true);
     }
@@ -195,27 +240,22 @@ class ContextService implements ContextServiceInterface
     private function getAccessToken($code)
     {
         $this->logger->debug('Get Access Token.');
-        $curlWrapper = new CurlWrapper($this->proxy);
+        $this->initRequest();
+        $token_url = $this->fcBaseUrl.'token';
         $post_data = [
             "grant_type"    => "authorization_code",
-            "code"          => $code,
             "redirect_uri"  => $this->callbackUrl,
             "client_id"     => $this->clientId,
             "client_secret" => $this->clientSecret,
+            "code"          => $code,
         ];
-        
         $this->logger->debug('POST Data to FranceConnect.');
-        $curlWrapper->setPostDataUrlEncode($post_data);
-        $token_url = $this->fcBaseUrl.'token';
-        $result = $curlWrapper->get($token_url);
+        $this->setPostFields($post_data);
+        $response = \Unirest\Request::post($token_url);
         
         // check status code
-        if ($curlWrapper->getHTTPCode() != 200) {
-            if (!$result) {
-                $this->logger->error("Curl Error : ".$curlWrapper->getLastError());
-                throw new Exception($curlWrapper->getLastError());
-            }
-            $result_array = json_decode($result, true);
+        if ($response->code != Response::HTTP_OK) {
+            $result_array = $response->body;
             $description = array_key_exists(
                 "error_description",
                 $result_array
@@ -223,14 +263,13 @@ class ContextService implements ContextServiceInterface
             $this->logger->error(
                 $result_array["error"].$description
             );
-            throw new Exception("FranceConnect Error => ".$result_array['error']);
+            throw new Exception("FranceConnectError".$response->code." msg = ".$response->raw_body);
         }
         
-        $result_array = json_decode($result, true);
+        $result_array = $response->body;
         $id_token = $result_array['id_token'];
         $this->session->set(static::ID_TOKEN_HINT, $id_token);
         $all_part = explode(".", $id_token);
-        $header = json_decode(base64_decode($all_part[0]), true);
         $payload = json_decode(base64_decode($all_part[1]), true);
         
         // check nonce parameter
@@ -252,6 +291,37 @@ class ContextService implements ContextServiceInterface
     }
     
     /**
+     * Prepare request.
+     */
+    private function initRequest()
+    {
+        \Unirest\Request::clearCurlOpts();
+        \Unirest\Request::clearDefaultHeaders();
+        // => jsonOpts équivaut à "json_decode($result, true)"
+        \Unirest\Request::jsonOpts(true);
+        if (!is_null($this->proxyHost) && !empty($this->proxyHost)) {
+            \Unirest\Request::proxy($this->proxyHost, $this->proxyPort);
+        }
+    }
+    
+    /**
+     * set post fields.
+     *
+     * @param array $post_data
+     */
+    private function setPostFields(array $post_data)
+    {
+        $pd = [];
+        foreach ($post_data as $k => $v) {
+            $pd[] = "$k=$v";
+        }
+        $pd = implode("&", $pd);
+        \Unirest\Request::curlOpt(CURLOPT_POST, true);
+        \Unirest\Request::curlOpt(CURLOPT_POSTFIELDS, $pd);
+        \Unirest\Request::curlOpt(CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+    }
+    
+    /**
      * Last call to FranceConnect to get data.
      *
      * @param $accessToken
@@ -262,23 +332,20 @@ class ContextService implements ContextServiceInterface
     private function getInfos($accessToken)
     {
         $this->logger->debug('Get Infos.');
-        $curlWrapper = new CurlWrapper($this->proxy);
-        $curlWrapper->addHeader("Authorization", "Bearer $accessToken");
-        $userInfoUrl = $this->fcBaseUrl."userinfo";
-        $result = $curlWrapper->get($userInfoUrl);
-        
-        if ($curlWrapper->getHTTPCode() != 200) {
-            if (!$result) {
-                $messageErreur = $curlWrapper->getLastError();
-            } else {
-                $result_array = json_decode($result, true);
-                $messageErreur = $result_array['error'];
-            }
+        $this->initRequest();
+        $headers = [
+            "Authorization" => "Bearer $accessToken",
+        ];
+        $userInfoUrl = $this->fcBaseUrl."userinfo?schema=openid";
+        $response = \Unirest\Request::get($userInfoUrl, $headers);
+        if ($response->code != Response::HTTP_OK) {
+            $result_array = $response->body;
+            $messageErreur = $result_array['error'];
             $this->logger->error($messageErreur);
             throw new Exception("Erreur lors de la récupération des infos sur le serveur OpenID : ".$messageErreur);
         }
         
-        return json_decode($result, true);
+        return $response->body;
     }
     
     /**
