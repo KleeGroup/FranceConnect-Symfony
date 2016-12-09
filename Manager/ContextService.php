@@ -201,6 +201,7 @@ class ContextService implements ContextServiceInterface
         }
     
         $this->tokenStorage->setToken($token);
+        $this->session->set('_security_administre',serialize($token));
         
         return json_encode($userInfo, true);
     }
