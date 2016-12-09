@@ -32,6 +32,7 @@
             <argument id="proxyPort">%france_connect.proxy_port%</argument>
             <argument id="callbackRoute">%france_connect.callback_route%</argument>
             <argument id="logoutRoute">%france_connect.logout_route%</argument>
+            <argument id="providersKeys">%france_connect.providers_keys%</argument>
         </service>
 
     </services>

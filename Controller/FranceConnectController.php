@@ -57,10 +57,9 @@ class FranceConnectController extends Controller
         $logger = $this->getLogger();
         $logger->debug('Callback intercept.');
         $getParams = $request->query->all();
-//        $json = $this->getFCService()->getUserInfo($getParams);
+        $this->getFCService()->getUserInfo($getParams);
         $route_name = $this->getParameter('france_connect.result');
         return $this->redirectToRoute($route_name);
-//        return $this->redirectToRoute($route_name, ['json' => urlencode($json)]);
     }
     
     /**

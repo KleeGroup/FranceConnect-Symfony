@@ -90,6 +90,11 @@ class ContextService implements ContextServiceInterface
     private $requestStack;
     
     /**
+     * @var array
+     */
+    private $providersKeys;
+    
+    /**
      * ContextService constructor.
      *
      * @param SessionInterface $session   session manager
@@ -115,7 +120,8 @@ class ContextService implements ContextServiceInterface
         string $proxy,
         int $proxyPort,
         $callbackRoute,
-        $logoutRoute
+        $logoutRoute,
+        array $providersKeys
     ) {
         $this->session = $session;
         $this->logger = $logger;
@@ -135,6 +141,7 @@ class ContextService implements ContextServiceInterface
         $this->tokenStorage = $tokenStorage;
         $this->sessionStrategy = $sessionStrategy;
         $this->requestStack = $requestStack;
+        $this->providersKeys = $providersKeys;
     }
     
     /**
@@ -192,16 +199,24 @@ class ContextService implements ContextServiceInterface
         $accessToken = $this->getAccessToken($params['code']);
         $userInfo = $this->getInfos($accessToken);
         $userInfo['access_token'] = $accessToken;
-    
-        $token = new FranceConnectToken($userInfo, [FranceConnectAuthenticatedVoter::IS_FRANCE_CONNECT_AUTHENTICATED, AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY]);
+        
+        $token = new FranceConnectToken($userInfo,
+            [
+                FranceConnectAuthenticatedVoter::IS_FRANCE_CONNECT_AUTHENTICATED,
+                AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY,
+            ]
+        );
         $request = $this->requestStack->getCurrentRequest();
-    
+        
         if (null !== $request) {
             $this->sessionStrategy->onAuthentication($request, $token);
         }
-    
+        
         $this->tokenStorage->setToken($token);
-        $this->session->set('_security_administre',serialize($token));
+        foreach ($this->providersKeys as $key) {
+            $this->session->set('_security_'.$key, serialize($token));
+        }
+        
         
         return json_encode($userInfo, true);
     }

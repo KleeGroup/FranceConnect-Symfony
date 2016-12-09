@@ -37,6 +37,8 @@ class FranceConnectExtension extends Extension
         $container->setParameter('france_connect.result', $config['result_route']);
         
         $container->setParameter('france_connect.scopes', $config['scopes']);
+        $container->setParameter('france_connect.providers_keys', $config['providers_keys']);
+        
         $container->setParameter('france_connect.proxy_host', $config['proxy_host']);
         $container->setParameter('france_connect.proxy_port', $config['proxy_port']);
     }
