@@ -113,14 +113,14 @@ class ContextService implements ContextServiceInterface
         SessionAuthenticationStrategyInterface $sessionStrategy,
         TokenStorageInterface $tokenStorage,
         RequestStack $requestStack,
-        $clientId,
-        $clientSecret,
-        $fcBaseUrl,
+        string $clientId,
+        string $clientSecret,
+        string $fcBaseUrl,
         array $scopes,
-        string $proxy,
-        int $proxyPort,
-        $callbackRoute,
-        $logoutRoute,
+        string $proxy = null,
+        int $proxyPort = null,
+        string $callbackRoute,
+        string $logoutRoute,
         array $providersKeys
     ) {
         $this->session = $session;

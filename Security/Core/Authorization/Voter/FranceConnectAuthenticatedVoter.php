@@ -18,20 +18,11 @@ namespace KleeGroup\FranceConnectBundle\Security\Core\Authorization\Voter;
 
 use KleeGroup\FranceConnectBundle\Security\Core\Authentication\Token\FranceConnectToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 class FranceConnectAuthenticatedVoter implements VoterInterface
 {
     const IS_FRANCE_CONNECT_AUTHENTICATED = 'IS_FRANCE_CONNECT_AUTHENTICATED';
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function supportsClass($class)
-    {
-        return true;
-    }
     
     /**
      * {@inheritdoc}
