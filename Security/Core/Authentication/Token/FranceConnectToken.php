@@ -26,8 +26,7 @@ class FranceConnectToken extends AbstractToken
     private $fcIdentity;
     
     /**
-     * @param       string
-     * @param array $attributes
+     * @param array $identity
      * @param array $roles
      */
     public function __construct(array $identity, array $roles = [])

@@ -30,8 +30,10 @@
             <argument id="scopes">%france_connect.scopes%</argument>
             <argument id="proxy">%france_connect.proxy_host%</argument>
             <argument id="proxyPort">%france_connect.proxy_port%</argument>
-            <argument id="callbackRoute">%france_connect.callback_route%</argument>
-            <argument id="logoutRoute">%france_connect.logout_route%</argument>
+            <argument id="callbackType">%france_connect.callback_type%</argument>
+            <argument id="callbackValue">%france_connect.callback_value%</argument>
+            <argument id="logoutType">%france_connect.logout_type%</argument>
+            <argument id="logoutValue">%france_connect.logout_value%</argument>
             <argument id="providersKeys">%france_connect.providers_keys%</argument>
         </service>
 

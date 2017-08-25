@@ -34,15 +34,15 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $client_secret     = '123456789';
         $provider_base_url = 'https://fcp.integ01.dev-franceconnect.fr/api/v1/';
         $result_route      = 'route';
-        $post_logout_route = 'route';
+        $logout_route      = 'route';
 
         $config = array(
             'france_connect'=> array (
                 'client_id'         => $client_id,
                 'client_secret'     => $client_secret,
                 'provider_base_url' => $provider_base_url,
-                'result_route'      => $result_route,
-                'post_logout_route' => $post_logout_route
+                'result_value'      => $result_route,
+                'logout_value'      => $logout_route
             )
         );
 

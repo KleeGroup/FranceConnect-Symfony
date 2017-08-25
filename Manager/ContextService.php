@@ -93,18 +93,27 @@ class ContextService implements ContextServiceInterface
      * @var array
      */
     private $providersKeys;
-    
+
     /**
      * ContextService constructor.
-     *
-     * @param SessionInterface $session   session manager
-     * @param LoggerInterface  $logger    logger
-     * @param string           $clientId  service identifier
-     * @param string           $clientSecret
-     * @param string           $fcBaseUrl FranceConnect base URL
-     * @param array            $scopes    scopes
-     * @param string           $proxy     proxy
-     * @param string           $proxyPort proxyPort
+     * @param SessionInterface $session
+     * @param LoggerInterface $logger
+     * @param RouterInterface $router
+     * @param SessionAuthenticationStrategyInterface $sessionStrategy
+     * @param TokenStorageInterface $tokenStorage
+     * @param RequestStack $requestStack
+     * @param string $clientId
+     * @param string $clientSecret
+     * @param string $fcBaseUrl
+     * @param array $scopes
+     * @param string|null $proxy
+     * @param int|null $proxyPort
+     * @param string $callbackType
+     * @param string $callbackValue
+     * @param string $logoutType
+     * @param string $logoutValue
+     * @param array $providersKeys
+     * @throws Exception
      */
     public function __construct(
         SessionInterface $session,
@@ -119,8 +128,10 @@ class ContextService implements ContextServiceInterface
         array $scopes,
         string $proxy = null,
         int $proxyPort = null,
-        string $callbackRoute,
-        string $logoutRoute,
+        string $callbackType,
+        string $callbackValue,
+        string $logoutType,
+        string $logoutValue,
         array $providersKeys
     ) {
         $this->session = $session;
@@ -129,13 +140,35 @@ class ContextService implements ContextServiceInterface
         $this->clientSecret = $clientSecret;
         $this->fcBaseUrl = $fcBaseUrl;
         $this->scopes = $scopes;
+
+        //  Callback URL
         try {
-            // ensure route exist
-            $this->logoutUrl = $router->generate($logoutRoute, [], UrlGeneratorInterface::ABSOLUTE_URL);
-            $this->callbackUrl = $router->generate($callbackRoute, [], UrlGeneratorInterface::ABSOLUTE_URL);
-        } catch (RouteNotFoundException $ex) {
-            throw new Exception("Route name is invalid", $ex);
+            switch ($callbackType) {
+                case 'route' :
+                    $this->callbackUrl = $router->generate($callbackValue, [], UrlGeneratorInterface::ABSOLUTE_URL);
+                    break;
+                default :
+                    $this->callbackUrl = $callbackValue;
+                    break;
+            }
+        } catch (RouteNotFoundException $e) {
+            throw new Exception("Callback route name is invalid", $e);
         }
+
+        //  Logout URL
+        try {
+            switch ($logoutType) {
+                case 'route' :
+                    $this->logoutUrl = $router->generate($logoutValue, [], UrlGeneratorInterface::ABSOLUTE_URL);
+                    break;
+                default :
+                    $this->logoutUrl = $logoutValue;
+                    break;
+            }
+        } catch (RouteNotFoundException $e) {
+            throw new Exception("Logout route name is invalid", $e);
+        }
+
         $this->proxyPort = $proxyPort;
         $this->proxyHost = $proxy;
         $this->tokenStorage = $tokenStorage;
