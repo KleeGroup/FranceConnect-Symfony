@@ -31,30 +31,13 @@ class FranceConnectController extends Controller
     }
     
     /**
-     * @return object|\Symfony\Bridge\Monolog\Logger
-     */
-    private function getLogger()
-    {
-        return $this->logger;
-    }
-    
-    /**
-     * @return ContextService|object
-     */
-    private function getFCService()
-    {
-        return $this->contextService;
-    }
-    
-    /**
      * @Route("/login_fc", methods="GET")
      * @return RedirectResponse
      */
     public function loginAction( )
     {
-        $logger = $this->getLogger();
-        $logger->debug('Generating a URL to get the authorization code.');
-        $url = $this->getFCService()->generateAuthorizationURL();
+        $this->logger->debug('Generating a URL to get the authorization code.');
+        $url = $this->contextService->generateAuthorizationURL();
         
         return $this->redirect($url);
     }
@@ -67,10 +50,9 @@ class FranceConnectController extends Controller
      */
     public function checkAction(Request $request)
     {
-        $logger = $this->getLogger();
-        $logger->debug('Callback intercept.');
+        $this->logger->debug('Callback intercept.');
         $getParams = $request->query->all();
-        $this->getFCService()->getUserInfo($getParams);
+        $this->contextService->getUserInfo($getParams);
 
         switch ($this->getParameter('france_connect.result_type')) {
             case 'route' :
@@ -90,9 +72,8 @@ class FranceConnectController extends Controller
      */
     public function logoutAction()
     {
-        $logger = $this->getLogger();
-        $logger->debug('Get Logout URL.');
-        $url = $this->getFCService()->generateLogoutURL();
+        $this->logger->debug('Get Logout URL.');
+        $url = $this->contextService->generateLogoutURL();
         
         return $this->redirect($url);
     }
