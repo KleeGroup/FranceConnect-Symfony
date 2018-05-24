@@ -152,7 +152,7 @@ class ContextService implements ContextServiceInterface
                     break;
             }
         } catch (RouteNotFoundException $e) {
-            throw new Exception("Callback route name is invalid", $e);
+            throw new Exception("Callback route name is invalid", 500, $e);
         }
 
         //  Logout URL
@@ -166,7 +166,7 @@ class ContextService implements ContextServiceInterface
                     break;
             }
         } catch (RouteNotFoundException $e) {
-            throw new Exception("Logout route name is invalid", $e);
+            throw new Exception("Logout route name is invalid", 500, $e);
         }
 
         $this->proxyPort = $proxyPort;

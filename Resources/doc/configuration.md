@@ -31,8 +31,8 @@ france_connect:
 * *client_id*: identifier provided by FranceConnect
 * *client_secret*: secret identifier provided by FranceConnect
 * *provider_base_url*: FranceConnect API URL. <strong>Must be change in production environment </b>
-* *post_logout_route*: Route for redirecting user after logout
-* *result_route*: Route for redirecting user after login on FranceConnect
+* *logout_value*: Route for redirecting user after logout
+* *result_value*: Route for redirecting user after login on FranceConnect
 * *scopes*: scopes  requested from FranceConnect. (Cf [documentation FranceConnect](https://franceconnect.gouv.fr/fournisseur-service#identite-pivot))
 * *providers_keys* list of firewalls names. The token will be injected on these firewall
 

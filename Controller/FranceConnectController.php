@@ -3,7 +3,9 @@
 namespace KleeGroup\FranceConnectBundle\Controller;
 
 use KleeGroup\FranceConnectBundle\Manager\ContextService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use KleeGroup\FranceConnectBundle\Manager\ContextServiceInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,13 +18,24 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FranceConnectController extends Controller
 {
+    /** @var LoggerInterface */
+    private $logger;
+
+    /** @var ContextServiceInterface */
+    private $contextService;
+
+    public function __construct(LoggerInterface $logger, ContextServiceInterface $contextService)
+    {
+        $this->logger = $logger;
+        $this->contextService = $contextService;
+    }
     
     /**
      * @return object|\Symfony\Bridge\Monolog\Logger
      */
     private function getLogger()
     {
-        return $this->get('logger');
+        return $this->logger;
     }
     
     /**
@@ -30,7 +43,7 @@ class FranceConnectController extends Controller
      */
     private function getFCService()
     {
-        return $this->get('france_connect.service.context');
+        return $this->contextService;
     }
     
     /**

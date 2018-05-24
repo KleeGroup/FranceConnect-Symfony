@@ -1,7 +1,7 @@
 {
   "name": "kleegroup/franceconnect-bundle",
   "type": "symfony-bundle",
-  "description": "Symfony3 OpenID security extension franceconnect",
+  "description": "Symfony3/4 OpenID security extension franceconnect",
   "keywords": ["Security", "OpenId", "Authentication"],
   "homepage": "https://github.com/KleeGroup/FranceConnect-Symfony",
   "license": "MIT",
@@ -12,13 +12,13 @@
     }
   ],
   "require": {
-    "php": ">=5.6.0",
-    "symfony/symfony": "3.*",
+    "php": "^7.1.3",
+    "symfony/framework-bundle": "^3|^4",
     "namshi/jose": "7.2.*",
     "mashape/unirest-php": "3.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "~5.4"
+    "phpunit/phpunit": "~7.1"
   },
   "autoload": {
     "psr-0": { "KleeGroup\\FranceConnectBundle": "" }
