@@ -5,6 +5,7 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
 
         <service
                 id="security.access.fc_authenticated_voter"
@@ -36,6 +37,13 @@
             <argument id="logoutValue">%france_connect.logout_value%</argument>
             <argument id="providersKeys">%france_connect.providers_keys%</argument>
         </service>
+
+        <service id="KleeGroup\FranceConnectBundle\Manager\ContextServiceInterface" alias="france_connect.service.context">
+        </service>
+
+        <prototype namespace="KleeGroup\FranceConnectBundle\Controller\" resource="../../Controller">
+            <tag name="controller.service_arguments" />
+        </prototype>
 
     </services>
 

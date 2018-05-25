@@ -3,7 +3,9 @@
 namespace KleeGroup\FranceConnectBundle\Controller;
 
 use KleeGroup\FranceConnectBundle\Manager\ContextService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use KleeGroup\FranceConnectBundle\Manager\ContextServiceInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,21 +18,16 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FranceConnectController extends Controller
 {
-    
-    /**
-     * @return object|\Symfony\Bridge\Monolog\Logger
-     */
-    private function getLogger()
+    /** @var LoggerInterface */
+    private $logger;
+
+    /** @var ContextServiceInterface */
+    private $contextService;
+
+    public function __construct(LoggerInterface $logger, ContextServiceInterface $contextService)
     {
-        return $this->get('logger');
-    }
-    
-    /**
-     * @return ContextService|object
-     */
-    private function getFCService()
-    {
-        return $this->get('france_connect.service.context');
+        $this->logger = $logger;
+        $this->contextService = $contextService;
     }
     
     /**
@@ -39,9 +36,8 @@ class FranceConnectController extends Controller
      */
     public function loginAction( )
     {
-        $logger = $this->getLogger();
-        $logger->debug('Generating a URL to get the authorization code.');
-        $url = $this->getFCService()->generateAuthorizationURL();
+        $this->logger->debug('Generating a URL to get the authorization code.');
+        $url = $this->contextService->generateAuthorizationURL();
         
         return $this->redirect($url);
     }
@@ -54,10 +50,9 @@ class FranceConnectController extends Controller
      */
     public function checkAction(Request $request)
     {
-        $logger = $this->getLogger();
-        $logger->debug('Callback intercept.');
+        $this->logger->debug('Callback intercept.');
         $getParams = $request->query->all();
-        $this->getFCService()->getUserInfo($getParams);
+        $this->contextService->getUserInfo($getParams);
 
         switch ($this->getParameter('france_connect.result_type')) {
             case 'route' :
@@ -77,9 +72,8 @@ class FranceConnectController extends Controller
      */
     public function logoutAction()
     {
-        $logger = $this->getLogger();
-        $logger->debug('Get Logout URL.');
-        $url = $this->getFCService()->generateLogoutURL();
+        $this->logger->debug('Get Logout URL.');
+        $url = $this->contextService->generateLogoutURL();
         
         return $this->redirect($url);
     }
