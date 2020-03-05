@@ -24,7 +24,7 @@ class FranceConnectToken extends AbstractToken
      * @var string
      */
     private $fcIdentity;
-    
+
     /**
      * @param array $identity
      * @param array $roles
@@ -36,7 +36,7 @@ class FranceConnectToken extends AbstractToken
         $this->fcIdentity = $identity;
         $this->setUser('anon.');
     }
-    
+
     /**
      * @return string
      */
@@ -44,7 +44,7 @@ class FranceConnectToken extends AbstractToken
     {
         return $this->fcIdentity;
     }
-    
+
     /**
      * @return void
      */
@@ -52,7 +52,7 @@ class FranceConnectToken extends AbstractToken
     {
         return '';
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -60,7 +60,7 @@ class FranceConnectToken extends AbstractToken
     {
         return serialize([$this->fcIdentity, parent::serialize()]);
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -69,5 +69,21 @@ class FranceConnectToken extends AbstractToken
         list($this->fcIdentity, $parentStr) = unserialize($str);
         parent::unserialize($parentStr);
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __serialize(): array
+    {
+        return [$this->fcIdentity, parent::__serialize()];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __unserialize(array $data): void
+    {
+        [$this->fcIdentity, $parentData] = $data;
+        parent::__unserialize($parentData);
+    }
 }
