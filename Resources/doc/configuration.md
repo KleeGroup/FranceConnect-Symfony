@@ -13,8 +13,8 @@ france_connect:
     #FranceConnect base URL
     provider_base_url: 'https://fcp.integ01.dev-franceconnect.fr/api/v1/'
     #route name for logout
-    post_logout_route: 'app_default_default'
-    result_route: 'app_default_franceconnect'
+    logout_value: 'app_default_default'
+    result_value: 'app_default_franceconnect'
     proxy_host: '192.20.12.5'
     proxy_port: 3128
     # data
