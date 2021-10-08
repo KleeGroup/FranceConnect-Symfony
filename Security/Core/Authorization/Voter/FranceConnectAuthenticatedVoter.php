@@ -22,7 +22,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 class FranceConnectAuthenticatedVoter implements VoterInterface
 {
-    const IS_FRANCE_CONNECT_AUTHENTICATED = 'IS_FRANCE_CONNECT_AUTHENTICATED';
+    public const IS_FRANCE_CONNECT_AUTHENTICATED = 'IS_FRANCE_CONNECT_AUTHENTICATED';
     
     /**
      * {@inheritdoc}
@@ -47,7 +47,7 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
      */
     public function supportsAttribute($attribute)
     {
-        return null !== $attribute && static::IS_FRANCE_CONNECT_AUTHENTICATED === $attribute;
+        return static::IS_FRANCE_CONNECT_AUTHENTICATED === $attribute;
     }
     
 }

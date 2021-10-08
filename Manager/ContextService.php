@@ -206,7 +206,7 @@ class ContextService implements ContextServiceInterface
      */
     private function getRandomToken()
     {
-        return sha1(mt_rand(0, mt_getrandmax()));
+        return sha1(random_int(0, mt_getrandmax()));
     }
     
     /**
@@ -303,7 +303,7 @@ class ContextService implements ContextServiceInterface
         $response = \Unirest\Request::post($token_url);
         
         // check status code
-        if ($response->code != Response::HTTP_OK) {
+        if ($response->code !== Response::HTTP_OK) {
             $result_array = $response->body;
             $description = array_key_exists(
                 "error_description",
@@ -387,7 +387,7 @@ class ContextService implements ContextServiceInterface
         ];
         $userInfoUrl = $this->fcBaseUrl."userinfo?schema=openid";
         $response = \Unirest\Request::get($userInfoUrl, $headers);
-        if ($response->code != Response::HTTP_OK) {
+        if ($response->code !== Response::HTTP_OK) {
             $result_array = $response->body;
             $messageErreur = $result_array['error'];
             $this->logger->error($messageErreur);

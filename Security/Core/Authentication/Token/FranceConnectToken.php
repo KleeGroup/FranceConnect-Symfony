@@ -32,7 +32,7 @@ class FranceConnectToken extends AbstractToken
     public function __construct(array $identity, array $roles = [])
     {
         parent::__construct($roles);
-        $this->setAuthenticated(count($this->getRoles()) > 0);
+        $this->setAuthenticated(count($this->getRoleNames()) > 0);
         $this->fcIdentity = $identity;
         $this->setUser('anon.');
     }
@@ -56,18 +56,9 @@ class FranceConnectToken extends AbstractToken
     /**
      * {@inheritdoc}
      */
-    public function serialize()
+    public function __unserialize(array $data): void
     {
-        return serialize([$this->fcIdentity, parent::serialize()]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function unserialize($str)
-    {
-        list($this->fcIdentity, $parentStr) = unserialize($str);
-        parent::unserialize($parentStr);
+        [$this->fcIdentity, $this->user, $this->authenticated, , $this->attributes, $this->roleNames] = $data;
     }
 
     /**
@@ -75,15 +66,6 @@ class FranceConnectToken extends AbstractToken
      */
     public function __serialize(): array
     {
-        return [$this->fcIdentity, parent::__serialize()];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __unserialize(array $data): void
-    {
-        [$this->fcIdentity, $parentData] = $data;
-        parent::__unserialize($parentData);
+        return [$this->fcIdentity, $this->user, $this->authenticated, null, $this->attributes, $this->roleNames];
     }
 }

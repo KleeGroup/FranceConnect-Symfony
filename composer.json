@@ -13,15 +13,25 @@
   ],
   "require": {
     "php": "^7.1.3",
-    "symfony/framework-bundle": "^4",
+    "ext-json": "*",
     "namshi/jose": "7.2.*",
-    "mashape/unirest-php": "3.*"
+    "mashape/unirest-php": "3.*",
+    "symfony/config": "3.4.* || >=4.0",
+    "symfony/dependency-injection": "3.4.* || >=4.0",
+    "symfony/framework-bundle": "3.4.* || >=4.0",
+    "symfony/http-foundation": "3.4.* || >=4.0",
+    "symfony/http-kernel": "3.4.* || >=4.0",
+    "symfony/routing": "3.4.* || >=4.0",
+    "symfony/security-bundle": "3.4.* || >=4.0",
   },
   "require-dev": {
     "phpunit/phpunit": "~7.1"
   },
   "autoload": {
-    "psr-0": { "KleeGroup\\FranceConnectBundle": "" }
+    "psr-4": { "KleeGroup\\FranceConnectBundle": "" }
+  },
+  "autoload-dev": {
+    "psr-4": { "KleeGroup\\FranceConnectBundle\\Tests\\": "Tests/" }
   },
   "suggest": {
     "doctrine/orm": "If you want store identities to database",
@@ -29,6 +39,7 @@
   },
   "target-dir": "KleeGroup/FranceConnectBundle",
   "config": {
-    "bin-dir": "bin"
+    "bin-dir": "bin",
+    "sort-packages": true
   }
 }

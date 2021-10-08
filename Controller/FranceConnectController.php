@@ -2,13 +2,12 @@
 
 namespace KleeGroup\FranceConnectBundle\Controller;
 
-use KleeGroup\FranceConnectBundle\Manager\ContextService;
 use KleeGroup\FranceConnectBundle\Manager\ContextServiceInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class FranceConnectController
@@ -16,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
  * @package KleeGroup\FranceConnectBundle\Controller
  * @Route("/france-connect")
  */
-class FranceConnectController extends Controller
+class FranceConnectController extends AbstractController
 {
     /** @var LoggerInterface */
     private $logger;
