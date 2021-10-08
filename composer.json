@@ -37,7 +37,6 @@
     "doctrine/orm": "If you want store identities to database",
     "doctrine/mongodb-odm": "If you want store identities to mongodb"
   },
-  "target-dir": "KleeGroup/FranceConnectBundle",
   "config": {
     "bin-dir": "bin",
     "sort-packages": true
