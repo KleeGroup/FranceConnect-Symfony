@@ -18,17 +18,17 @@
     "mashape/unirest-php": "3.*",
     "symfony/config": "3.4.* || >=4.0",
     "symfony/dependency-injection": "3.4.* || >=4.0",
-    "symfony/framework-bundle": "3.4.* || >=4.0",
+    "symfony/framework-bundle": "3.4.* || < 5.0",
     "symfony/http-foundation": "3.4.* || >=4.0",
     "symfony/http-kernel": "3.4.* || >=4.0",
     "symfony/routing": "3.4.* || >=4.0",
-    "symfony/security-bundle": "3.4.* || >=4.0",
+    "symfony/security-bundle": "3.4.* || >=4.0"
   },
   "require-dev": {
     "phpunit/phpunit": "~7.1"
   },
   "autoload": {
-    "psr-4": { "KleeGroup\\FranceConnectBundle": "" }
+    "psr-4": { "KleeGroup\\FranceConnectBundle\\": "" }
   },
   "autoload-dev": {
     "psr-4": { "KleeGroup\\FranceConnectBundle\\Tests\\": "Tests/" }
