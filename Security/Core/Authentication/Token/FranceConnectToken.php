@@ -58,7 +58,9 @@ class FranceConnectToken extends AbstractToken
      */
     public function __unserialize(array $data): void
     {
-        [$this->fcIdentity, $this->user, $this->authenticated, , $this->attributes, $this->roleNames] = $data;
+        [$this->fcIdentity, $parentData] = $data;
+        $parentData = \is_array($parentData) ? $parentData : unserialize($parentData);
+        parent::__unserialize($parentData);
     }
 
     /**
@@ -66,6 +68,6 @@ class FranceConnectToken extends AbstractToken
      */
     public function __serialize(): array
     {
-        return [$this->fcIdentity, $this->user, $this->authenticated, null, $this->attributes, $this->roleNames];
+        return [$this->fcIdentity, parent::__serialize()];
     }
 }
