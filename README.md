@@ -4,7 +4,7 @@ FranceConnect-Symfony
 [![Latest Stable Version](https://poser.pugx.org/kleegroup/franceconnect-bundle/v/stable?format=flat-square)](https://packagist.org/packages/kleegroup/franceconnect-bundle) [![Total Downloads](https://poser.pugx.org/kleegroup/franceconnect-bundle/downloads?format=flat-square)](https://packagist.org/packages/kleegroup/franceconnect-bundle) [![License](https://poser.pugx.org/kleegroup/franceconnect-bundle/license?format=flat-square)](https://packagist.org/packages/kleegroup/franceconnect-bundle) 
 # Synopsis
 
-Symfony 3 Bundle for FranceConnect authentication.
+Symfony bundle for FranceConnect authentication.
 
 # Dependencies
 

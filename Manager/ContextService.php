@@ -2,7 +2,6 @@
 
 namespace KleeGroup\FranceConnectBundle\Manager;
 
-
 use KleeGroup\FranceConnectBundle\Manager\Exception\Exception;
 use KleeGroup\FranceConnectBundle\Manager\Exception\SecurityException;
 use KleeGroup\FranceConnectBundle\Security\Core\Authentication\Token\FranceConnectToken;
@@ -18,7 +17,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
-
+use Unirest\Request;
 
 /**
  * Class ContextService
@@ -31,90 +30,21 @@ class ContextService implements ContextServiceInterface
     const OPENID_SESSION_NONCE = "open_id_session_nonce";
     const ID_TOKEN_HINT        = "open_id_token_hint";
     
-    /**
-     * @var SessionInterface session manager
-     */
-    private $session;
-    /**
-     * @var LoggerInterface logger
-     */
-    private $logger;
-    /**
-     * @var string Identifier
-     */
-    private $clientId;
-    /**
-     * @var string Secret identifier
-     */
-    private $clientSecret;
-    /**
-     * @var string FranceConnect base URL
-     */
-    private $fcBaseUrl;
-    /**
-     * @var array scopes of data
-     */
-    private $scopes;
-    /**
-     * @var string callback URL
-     */
-    private $callbackUrl;
-    /**
-     * @var string logout URL
-     */
-    private $logoutUrl;
-    
-    /**
-     * @var string proxy host
-     */
-    private $proxyHost;
-    
-    /**
-     * @var int proxy port
-     */
-    private $proxyPort;
-    
-    /**
-     * @var TokenStorageInterface
-     */
-    private $tokenStorage;
-    
-    /**
-     * @var SessionAuthenticationStrategyInterface
-     */
-    private $sessionStrategy;
-    
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-    
-    /**
-     * @var array
-     */
-    private $providersKeys;
+    private SessionInterface $session;
+    private LoggerInterface $logger;
+    private TokenStorageInterface $tokenStorage;
+    private SessionAuthenticationStrategyInterface $sessionStrategy;
+    private RequestStack $requestStack;
+    private string $clientId;
+    private string $clientSecret;
+    private string $fcBaseUrl;
+    private array $scopes;
+    private string $callbackUrl;
+    private string $logoutUrl;
+    private ?string $proxyHost;
+    private ?int $proxyPort;
+    private array $providersKeys;
 
-    /**
-     * ContextService constructor.
-     * @param SessionInterface $session
-     * @param LoggerInterface $logger
-     * @param RouterInterface $router
-     * @param SessionAuthenticationStrategyInterface $sessionStrategy
-     * @param TokenStorageInterface $tokenStorage
-     * @param RequestStack $requestStack
-     * @param string $clientId
-     * @param string $clientSecret
-     * @param string $fcBaseUrl
-     * @param array $scopes
-     * @param string|null $proxy
-     * @param int|null $proxyPort
-     * @param string $callbackType
-     * @param string $callbackValue
-     * @param string $logoutType
-     * @param string $logoutValue
-     * @param array $providersKeys
-     * @throws Exception
-     */
     public function __construct(
         SessionInterface $session,
         LoggerInterface $logger,
@@ -126,13 +56,13 @@ class ContextService implements ContextServiceInterface
         string $clientSecret,
         string $fcBaseUrl,
         array $scopes,
-        string $proxy = null,
-        int $proxyPort = null,
         string $callbackType,
         string $callbackValue,
         string $logoutType,
         string $logoutValue,
-        array $providersKeys
+        array $providersKeys,
+        string $proxy = null,
+        int $proxyPort = null
     ) {
         $this->session = $session;
         $this->logger = $logger;
@@ -143,13 +73,10 @@ class ContextService implements ContextServiceInterface
 
         //  Callback URL
         try {
-            switch ($callbackType) {
-                case 'route' :
-                    $this->callbackUrl = $router->generate($callbackValue, [], UrlGeneratorInterface::ABSOLUTE_URL);
-                    break;
-                default :
-                    $this->callbackUrl = $callbackValue;
-                    break;
+            if ($callbackType === 'route') {
+                $this->callbackUrl = $router->generate($callbackValue, [], UrlGeneratorInterface::ABSOLUTE_URL);
+            } else {
+                $this->callbackUrl = $callbackValue;
             }
         } catch (RouteNotFoundException $e) {
             throw new Exception("Callback route name is invalid", 500, $e);
@@ -157,13 +84,10 @@ class ContextService implements ContextServiceInterface
 
         //  Logout URL
         try {
-            switch ($logoutType) {
-                case 'route' :
-                    $this->logoutUrl = $router->generate($logoutValue, [], UrlGeneratorInterface::ABSOLUTE_URL);
-                    break;
-                default :
-                    $this->logoutUrl = $logoutValue;
-                    break;
+            if ($logoutType === 'route') {
+                $this->logoutUrl = $router->generate($logoutValue, [], UrlGeneratorInterface::ABSOLUTE_URL);
+            } else {
+                $this->logoutUrl = $logoutValue;
             }
         } catch (RouteNotFoundException $e) {
             throw new Exception("Logout route name is invalid", 500, $e);
@@ -300,7 +224,7 @@ class ContextService implements ContextServiceInterface
         ];
         $this->logger->debug('POST Data to FranceConnect.');
         $this->setPostFields($post_data);
-        $response = \Unirest\Request::post($token_url);
+        $response = Request::post($token_url);
         
         // check status code
         if ($response->code !== Response::HTTP_OK) {
@@ -344,12 +268,12 @@ class ContextService implements ContextServiceInterface
      */
     private function initRequest()
     {
-        \Unirest\Request::clearCurlOpts();
-        \Unirest\Request::clearDefaultHeaders();
+        Request::clearCurlOpts();
+        Request::clearDefaultHeaders();
         // => jsonOpts équivaut à "json_decode($result, true)"
-        \Unirest\Request::jsonOpts(true);
-        if (!is_null($this->proxyHost) && !empty($this->proxyHost)) {
-            \Unirest\Request::proxy($this->proxyHost, $this->proxyPort);
+        Request::jsonOpts(true);
+        if (!empty($this->proxyHost)) {
+            Request::proxy($this->proxyHost, $this->proxyPort);
         }
     }
     
@@ -365,9 +289,9 @@ class ContextService implements ContextServiceInterface
             $pd[] = "$k=$v";
         }
         $pd = implode("&", $pd);
-        \Unirest\Request::curlOpt(CURLOPT_POST, true);
-        \Unirest\Request::curlOpt(CURLOPT_POSTFIELDS, $pd);
-        \Unirest\Request::curlOpt(CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+        Request::curlOpt(CURLOPT_POST, true);
+        Request::curlOpt(CURLOPT_POSTFIELDS, $pd);
+        Request::curlOpt(CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
     }
     
     /**
@@ -386,7 +310,7 @@ class ContextService implements ContextServiceInterface
             "Authorization" => "Bearer $accessToken",
         ];
         $userInfoUrl = $this->fcBaseUrl."userinfo?schema=openid";
-        $response = \Unirest\Request::get($userInfoUrl, $headers);
+        $response = Request::get($userInfoUrl, $headers);
         if ($response->code !== Response::HTTP_OK) {
             $result_array = $response->body;
             $messageErreur = $result_array['error'];

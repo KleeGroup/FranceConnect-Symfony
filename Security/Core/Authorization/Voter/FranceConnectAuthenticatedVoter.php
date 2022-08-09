@@ -1,20 +1,6 @@
 <?php
-/**
- * Class FranceConnectAuthenticatedVoter
- *
- * User: tveron
- * Date: 08/12/2016
- * Time: 15:00
- *
- * @package   KleeGroup\FranceConnectBundle\Security\Core\Authorization\Voter
- * @author    tveron
- * @copyright 2016 Klee Group
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @link      https://github.com/KleeGroup/FranceConnect-Symfony
- */
 
 namespace KleeGroup\FranceConnectBundle\Security\Core\Authorization\Voter;
-
 
 use KleeGroup\FranceConnectBundle\Security\Core\Authentication\Token\FranceConnectToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -24,9 +10,6 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
 {
     public const IS_FRANCE_CONNECT_AUTHENTICATED = 'IS_FRANCE_CONNECT_AUTHENTICATED';
     
-    /**
-     * {@inheritdoc}
-     */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
         foreach ($attributes as $attribute) {
@@ -42,9 +25,6 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
         return VoterInterface::ACCESS_ABSTAIN;
     }
     
-    /**
-     * {@inheritdoc}
-     */
     public function supportsAttribute($attribute)
     {
         return static::IS_FRANCE_CONNECT_AUTHENTICATED === $attribute;

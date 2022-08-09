@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -17,11 +18,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class FranceConnectController extends AbstractController
 {
-    /** @var LoggerInterface */
-    private $logger;
-
-    /** @var ContextServiceInterface */
-    private $contextService;
+    private LoggerInterface $logger;
+    private ContextServiceInterface $contextService;
 
     public function __construct(LoggerInterface $logger, ContextServiceInterface $contextService)
     {
@@ -33,7 +31,7 @@ class FranceConnectController extends AbstractController
      * @Route("/login_fc", methods="GET")
      * @return RedirectResponse
      */
-    public function loginAction( )
+    public function loginAction( ): Response
     {
         $this->logger->debug('Generating a URL to get the authorization code.');
         $url = $this->contextService->generateAuthorizationURL();
@@ -53,13 +51,10 @@ class FranceConnectController extends AbstractController
         $getParams = $request->query->all();
         $this->contextService->getUserInfo($getParams);
 
-        switch ($this->getParameter('france_connect.result_type')) {
-            case 'route' :
-                $redirection = $this->redirectToRoute($this->getParameter('france_connect.result_value'));
-                break;
-            default :
-                $redirection = $this->redirect($this->getParameter('france_connect.result_value'));
-                break;
+        if ($this->getParameter('france_connect.result_type') === 'route') {
+            $redirection = $this->redirectToRoute($this->getParameter('france_connect.result_value'));
+        } else {
+            $redirection = $this->redirect($this->getParameter('france_connect.result_value'));
         }
 
         return $redirection;
@@ -76,6 +71,4 @@ class FranceConnectController extends AbstractController
         
         return $this->redirect($url);
     }
-    
-    
 }
