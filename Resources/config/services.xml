@@ -29,13 +29,13 @@
             <argument id="clientSecret">%france_connect.client_secret%</argument>
             <argument id="fcBaseUrl">%france_connect.provider_base_url%</argument>
             <argument id="scopes">%france_connect.scopes%</argument>
-            <argument id="proxy">%france_connect.proxy_host%</argument>
-            <argument id="proxyPort">%france_connect.proxy_port%</argument>
             <argument id="callbackType">%france_connect.callback_type%</argument>
             <argument id="callbackValue">%france_connect.callback_value%</argument>
             <argument id="logoutType">%france_connect.logout_type%</argument>
             <argument id="logoutValue">%france_connect.logout_value%</argument>
             <argument id="providersKeys">%france_connect.providers_keys%</argument>
+            <argument id="proxy">%france_connect.proxy_host%</argument>
+            <argument id="proxyPort">%france_connect.proxy_port%</argument>
         </service>
 
         <service id="KleeGroup\FranceConnectBundle\Manager\ContextServiceInterface" alias="france_connect.service.context">
