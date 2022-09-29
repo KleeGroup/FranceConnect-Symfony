@@ -10,7 +10,7 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
 {
     public const IS_FRANCE_CONNECT_AUTHENTICATED = 'IS_FRANCE_CONNECT_AUTHENTICATED';
     
-    public function vote(TokenInterface $token, $object, array $attributes)
+    public function vote(TokenInterface $token, $subject, array $attributes): int
     {
         foreach ($attributes as $attribute) {
             if (!$this->supportsAttribute($attribute)) {
@@ -25,7 +25,7 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
         return VoterInterface::ACCESS_ABSTAIN;
     }
     
-    public function supportsAttribute($attribute)
+    public function supportsAttribute($attribute): bool
     {
         return static::IS_FRANCE_CONNECT_AUTHENTICATED === $attribute;
     }

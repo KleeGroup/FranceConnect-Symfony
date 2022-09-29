@@ -18,20 +18,18 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class FranceConnectController extends AbstractController
 {
-    private LoggerInterface $logger;
-    private ContextServiceInterface $contextService;
-
-    public function __construct(LoggerInterface $logger, ContextServiceInterface $contextService)
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly ContextServiceInterface $contextService
+    )
     {
-        $this->logger = $logger;
-        $this->contextService = $contextService;
     }
     
     /**
      * @Route("/login_fc", methods="GET")
      * @return RedirectResponse
      */
-    public function loginAction( ): Response
+    public function loginAction(): Response
     {
         $this->logger->debug('Generating a URL to get the authorization code.');
         $url = $this->contextService->generateAuthorizationURL();
@@ -45,7 +43,7 @@ class FranceConnectController extends AbstractController
      *
      * @return RedirectResponse
      */
-    public function checkAction(Request $request)
+    public function checkAction(Request $request) : RedirectResponse
     {
         $this->logger->debug('Callback intercept.');
         $getParams = $request->query->all();
@@ -64,7 +62,7 @@ class FranceConnectController extends AbstractController
      * @Route("/logout_fc")
      * @return RedirectResponse
      */
-    public function logoutAction()
+    public function logoutAction(): RedirectResponse
     {
         $this->logger->debug('Get Logout URL.');
         $url = $this->contextService->generateLogoutURL();
