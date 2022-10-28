@@ -30,7 +30,6 @@ class ContextService implements ContextServiceInterface
     const OPENID_SESSION_NONCE = "open_id_session_nonce";
     const ID_TOKEN_HINT        = "open_id_token_hint";
     
-    private SessionInterface $session;
     private LoggerInterface $logger;
     private TokenStorageInterface $tokenStorage;
     private SessionAuthenticationStrategyInterface $sessionStrategy;
@@ -46,7 +45,6 @@ class ContextService implements ContextServiceInterface
     private array $providersKeys;
 
     public function __construct(
-        SessionInterface $session,
         LoggerInterface $logger,
         RouterInterface $router,
         SessionAuthenticationStrategyInterface $sessionStrategy,
@@ -64,7 +62,6 @@ class ContextService implements ContextServiceInterface
         string $proxy = null,
         int $proxyPort = null
     ) {
-        $this->session = $session;
         $this->logger = $logger;
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
@@ -107,8 +104,8 @@ class ContextService implements ContextServiceInterface
     public function generateAuthorizationURL()
     {
         $this->logger->debug('Set session tokens');
-        $this->session->set(static::OPENID_SESSION_TOKEN, $this->getRandomToken());
-        $this->session->set(static::OPENID_SESSION_NONCE, $this->getRandomToken());
+        $this->requestStack->getSession()->set(static::OPENID_SESSION_TOKEN, $this->getRandomToken());
+        $this->requestStack->getSession()->set(static::OPENID_SESSION_NONCE, $this->getRandomToken());
         
         $this->logger->debug('Generate Query String.');
         $params = [
@@ -116,8 +113,8 @@ class ContextService implements ContextServiceInterface
             'client_id'     => $this->clientId,
             'scope'         => implode(' ', $this->scopes),
             'redirect_uri'  => $this->callbackUrl,
-            'nonce'         => $this->session->get(static::OPENID_SESSION_NONCE),
-            'state'         => urlencode('token={'.$this->session->get(static::OPENID_SESSION_TOKEN).'}'),
+            'nonce'         => $this->requestStack->getSession()->get(static::OPENID_SESSION_NONCE),
+            'state'         => urlencode('token={'.$this->requestStack->getSession()->get(static::OPENID_SESSION_TOKEN).'}'),
         ];
         
         return $this->fcBaseUrl.'authorize?'.http_build_query($params);
@@ -157,7 +154,8 @@ class ContextService implements ContextServiceInterface
         $userInfo = $this->getInfos($accessToken);
         $userInfo['access_token'] = $accessToken;
         
-        $token = new FranceConnectToken($userInfo,
+        $token = new FranceConnectToken(
+            $userInfo,
             [
                 FranceConnectAuthenticatedVoter::IS_FRANCE_CONNECT_AUTHENTICATED,
                 AuthenticatedVoter::IS_AUTHENTICATED_ANONYMOUSLY,
@@ -171,7 +169,7 @@ class ContextService implements ContextServiceInterface
         
         $this->tokenStorage->setToken($token);
         foreach ($this->providersKeys as $key) {
-            $this->session->set('_security_'.$key, serialize($token));
+            $this->requestStack->getSession()->set('_security_'.$key, serialize($token));
         }
         
         
@@ -195,7 +193,7 @@ class ContextService implements ContextServiceInterface
         $token = preg_replace('~{~', '', $token, 1);
         $token = preg_replace('~}~', '', $token, 1);
         
-        if ($token != $this->session->get(static::OPENID_SESSION_TOKEN)) {
+        if ($token != $this->requestStack->getSession()->get(static::OPENID_SESSION_TOKEN)) {
             $this->logger->error('The value of the parameter STATE is not equal to the one which is expected');
             throw new SecurityException("The token is invalid.");
         }
@@ -214,8 +212,8 @@ class ContextService implements ContextServiceInterface
     {
         $this->logger->debug('Get Access Token.');
         $this->initRequest();
-        $token_url = $this->fcBaseUrl.'token';
-        $post_data = [
+        $tokenUrl = $this->fcBaseUrl.'token';
+        $postData = [
             "grant_type"    => "authorization_code",
             "redirect_uri"  => $this->callbackUrl,
             "client_id"     => $this->clientId,
@@ -223,44 +221,44 @@ class ContextService implements ContextServiceInterface
             "code"          => $code,
         ];
         $this->logger->debug('POST Data to FranceConnect.');
-        $this->setPostFields($post_data);
-        $response = Request::post($token_url);
+        $this->setPostFields($postData);
+        $response = Request::post($tokenUrl);
         
         // check status code
         if ($response->code !== Response::HTTP_OK) {
-            $result_array = $response->body;
+            $resultAray = $response->body;
             $description = array_key_exists(
                 "error_description",
-                $result_array
-            ) ? $result_array["error_description"] : '';
+                $resultAray
+            ) ? $resultAray["error_description"] : '';
             $this->logger->error(
-                $result_array["error"].$description
+                $resultAray["error"].$description
             );
             throw new Exception("FranceConnectError".$response->code." msg = ".$response->raw_body);
         }
         
-        $result_array = $response->body;
-        $id_token = $result_array['id_token'];
-        $this->session->set(static::ID_TOKEN_HINT, $id_token);
-        $all_part = explode(".", $id_token);
-        $payload = json_decode(base64_decode($all_part[1]), true);
+        $resultAray = $response->body;
+        $idToken = $resultAray['id_token'];
+        $this->requestStack->getSession()->set(static::ID_TOKEN_HINT, $idToken);
+        $allPart = explode(".", $idToken);
+        $payload = json_decode(base64_decode($allPart[1]), true);
         
         // check nonce parameter
-        if ($payload['nonce'] != $this->session->get(static::OPENID_SESSION_NONCE)) {
+        if ($payload['nonce'] != $this->requestStack->getSession()->get(static::OPENID_SESSION_NONCE)) {
             $this->logger->error('The value of the parameter NONCE is not equal to the one which is expected');
             throw new SecurityException("The nonce parameter is invalid");
         }
         // verify the signature of jwt
         $this->logger->debug('Check JWT signature.');
-        $jws = SimpleJWS::load($id_token);
+        $jws = SimpleJWS::load($idToken);
         if (!$jws->verify($this->clientSecret)) {
             $this->logger->error('The signature of the JWT is not valid.');
             throw new SecurityException("JWS is invalid");
         }
         
-        $this->session->remove(static::OPENID_SESSION_NONCE);
+        $this->requestStack->getSession()->remove(static::OPENID_SESSION_NONCE);
         
-        return $result_array['access_token'];
+        return $resultAray['access_token'];
     }
     
     /**
@@ -280,12 +278,12 @@ class ContextService implements ContextServiceInterface
     /**
      * set post fields.
      *
-     * @param array $post_data
+     * @param array $postData
      */
-    private function setPostFields(array $post_data)
+    private function setPostFields(array $postData)
     {
         $pd = [];
-        foreach ($post_data as $k => $v) {
+        foreach ($postData as $k => $v) {
             $pd[] = "$k=$v";
         }
         $pd = implode("&", $pd);
@@ -312,8 +310,8 @@ class ContextService implements ContextServiceInterface
         $userInfoUrl = $this->fcBaseUrl."userinfo?schema=openid";
         $response = Request::get($userInfoUrl, $headers);
         if ($response->code !== Response::HTTP_OK) {
-            $result_array = $response->body;
-            $messageErreur = $result_array['error'];
+            $resultArray = $response->body;
+            $messageErreur = $resultArray['error'];
             $this->logger->error($messageErreur);
             throw new Exception("Erreur lors de la récupération des infos sur le serveur OpenID : ".$messageErreur);
         }
@@ -329,11 +327,11 @@ class ContextService implements ContextServiceInterface
         $this->logger->debug('Generate Query String.');
         $params = [
             'post_logout_redirect_uri' => $this->logoutUrl,
-            'id_token_hint'            => $this->session->get(static::ID_TOKEN_HINT),
+            'id_token_hint'            => $this->requestStack->getSession()->get(static::ID_TOKEN_HINT),
         ];
         
         $this->logger->debug('Remove session token');
-        $this->session->clear();
+        $this->requestStack->getSession()->clear();
         
         return $this->fcBaseUrl.'logout?'.http_build_query($params);
     }

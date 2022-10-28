@@ -19,7 +19,6 @@
                  class="KleeGroup\FranceConnectBundle\Manager\ContextService"
                  public="true"
         >
-            <argument type="service" id="session"/>
             <argument type="service" id="logger"/>
             <argument type="service" id="router"/>
             <argument type="service" id="security.authentication.session_strategy" />
