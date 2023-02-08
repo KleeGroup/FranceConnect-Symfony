@@ -38,7 +38,7 @@ class Configuration implements ConfigurationInterface
                 ->defaultValue('')
             ->end()
             ->integerNode('proxy_port')
-                ->info('Proxy host.')
+                ->info('Proxy port.')
                 ->defaultValue(1080)
                 ->treatNullLike(1080)
                 ->defaultValue(null)
