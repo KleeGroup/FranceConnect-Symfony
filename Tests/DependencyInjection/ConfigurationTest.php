@@ -19,7 +19,7 @@ class ConfigurationTest extends TestCase
     /**
      * @test
      */
-    public function mustProvideConfiguration()
+    public function mustProvideConfiguration(): void
     {
         $emptyConfig = array();
         $this->expectException(InvalidConfigurationException::class);
@@ -29,7 +29,7 @@ class ConfigurationTest extends TestCase
     /**
      * @test
      */
-    public function scopesAreNotRequired ()
+    public function scopesAreNotRequired(): void
     {
         $client_id         = '123456789';
         $client_secret     = '123456789';
@@ -59,10 +59,11 @@ class ConfigurationTest extends TestCase
      * @param array $configs
      * @return array
      */
-    protected function processConfiguration(array $configs)
+    protected function processConfiguration(array $configs): array
     {
         $configuration = new Configuration();
         $processor = new Processor();
+
         return $processor->processConfiguration($configuration, $configs);
     }
 }

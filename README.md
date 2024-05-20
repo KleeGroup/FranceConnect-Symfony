@@ -16,7 +16,7 @@ Symfony bundle for FranceConnect authentication.
 All the installation instructions are located in [documentation](Resources/doc/).
 The installation is in two steps:
 * [Add FranceConnectBundle to composer.json](Resources/doc/installation.md)
-* [Configure FranceConnectBundle](Resources/doc/configuration.md) 
+* [Configure FranceConnectBundle](Resources/doc/configuration.md)
 
 # Usage
 
@@ -39,7 +39,7 @@ The installation is in two steps:
        public function franceConnectAction(Request $request)
        {
            $token = $this->get('security.token_storage')->getToken();
-           $token->getIdentity(); // json array provided by FranceConnect 
+           $token->getIdentity(); // json array provided by FranceConnect
            [...]
        }
     ```
@@ -50,7 +50,7 @@ The installation is in two steps:
             <script src="http://fcp.integ01.dev-franceconnect.fr/js/franceconnect.js"></script>
         {% endblock %}
     ```
-        
+
 4. Add FranceConnect block in your template
     ```html
         <div id="fconnect-profile" data-fc-logout-url="{{ url('france_connect_logout') }}">
@@ -62,4 +62,4 @@ The installation is in two steps:
 
 ## License
 
-This bundle is under the MIT license. 
+This bundle is under the MIT license.

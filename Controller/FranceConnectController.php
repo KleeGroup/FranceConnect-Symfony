@@ -24,7 +24,7 @@ class FranceConnectController extends AbstractController
     )
     {
     }
-    
+
     /**
      * @Route("/login_fc", methods="GET")
      * @return RedirectResponse
@@ -33,10 +33,10 @@ class FranceConnectController extends AbstractController
     {
         $this->logger->debug('Generating a URL to get the authorization code.');
         $url = $this->contextService->generateAuthorizationURL();
-        
+
         return $this->redirect($url);
     }
-    
+
     /**
      * @Route("/callback", methods="GET")
      * @param Request $request
@@ -57,7 +57,7 @@ class FranceConnectController extends AbstractController
 
         return $redirection;
     }
-    
+
     /**
      * @Route("/logout_fc")
      * @return RedirectResponse
@@ -66,7 +66,7 @@ class FranceConnectController extends AbstractController
     {
         $this->logger->debug('Get Logout URL.');
         $url = $this->contextService->generateLogoutURL();
-        
+
         return $this->redirect($url);
     }
 }
