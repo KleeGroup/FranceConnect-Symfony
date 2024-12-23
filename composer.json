@@ -3,8 +3,14 @@
   "type": "symfony-bundle",
   "description": "Symfony 4, 5 & 6 OpenID security extension FranceConnect",
   "keywords": ["Security", "OpenId", "Authentication"],
-  "homepage": "https://github.com/thomas-fortin-atos/FranceConnect-Symfony",
+  "homepage": "https://github.com/KleeGroup/FranceConnect-Symfony",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Klee Group",
+      "homepage": "http://www.kleegroup.com/"
+    }
+  ],
   "require": {
     "php": "^8.1.9",
     "ext-json": "*",
