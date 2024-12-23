@@ -16,7 +16,7 @@ interface ContextServiceInterface
      * @return string
      */
     public function generateAuthorizationURL();
-    
+
     /**
      *
      * Returns data provided by FranceConnect.
@@ -26,7 +26,7 @@ interface ContextServiceInterface
      * @return string json
      */
     public function getUserInfo(array $params);
-    
+
     /**
      *
      * Get Logout URL with query string.
