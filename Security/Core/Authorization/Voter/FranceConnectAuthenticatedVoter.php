@@ -16,12 +16,12 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
             if (!$this->supportsAttribute($attribute)) {
                 continue;
             }
-            
+
             return $token instanceof FranceConnectToken ?
                 VoterInterface::ACCESS_GRANTED :
                 VoterInterface::ACCESS_DENIED;
         }
-        
+
         return VoterInterface::ACCESS_ABSTAIN;
     }
     
@@ -29,5 +29,4 @@ class FranceConnectAuthenticatedVoter implements VoterInterface
     {
         return static::IS_FRANCE_CONNECT_AUTHENTICATED === $attribute;
     }
-    
 }

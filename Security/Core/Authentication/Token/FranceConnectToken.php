@@ -19,7 +19,7 @@ class FranceConnectToken extends AbstractToken
     /**
      * @return array
      */
-    public function getIdentity()
+    public function getIdentity(): array
     {
         return $this->fcIdentity;
     }

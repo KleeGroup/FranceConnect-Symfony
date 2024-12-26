@@ -15,11 +15,11 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class FranceConnectExtension extends Extension
 {
     const CALLBACK_ROUTE = "kleegroup_franceconnect_franceconnect_check";
-    
+
     /**
      * {@inheritdoc}
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
