@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Class FranceConnectController
@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @package KleeGroup\FranceConnectBundle\Controller
  * @Route("/france-connect")
  */
+#[Route(path: '/france-connect')]
 class FranceConnectController extends AbstractController
 {
     public function __construct(
@@ -26,9 +27,9 @@ class FranceConnectController extends AbstractController
     }
 
     /**
-     * @Route("/login_fc", methods="GET")
      * @return RedirectResponse
      */
+    #[Route(path: '/login_fc', methods: ['GET'])]
     public function loginAction(): Response
     {
         $this->logger->debug('Generating a URL to get the authorization code.');
@@ -38,11 +39,11 @@ class FranceConnectController extends AbstractController
     }
 
     /**
-     * @Route("/callback", methods="GET")
      * @param Request $request
      *
      * @return RedirectResponse
      */
+    #[Route(path: '/callback', methods: ['GET'])]
     public function checkAction(Request $request) : RedirectResponse
     {
         $this->logger->debug('Callback intercept.');
@@ -59,9 +60,9 @@ class FranceConnectController extends AbstractController
     }
 
     /**
-     * @Route("/logout_fc")
      * @return RedirectResponse
      */
+    #[Route(path: '/logout_fc')]
     public function logoutAction(): RedirectResponse
     {
         $this->logger->debug('Get Logout URL.');
