@@ -14,7 +14,6 @@ use Symfony\Component\Routing\Attribute\Route;
  * Class FranceConnectController
  *
  * @package KleeGroup\FranceConnectBundle\Controller
- * @Route("/france-connect")
  */
 #[Route(path: '/france-connect')]
 class FranceConnectController extends AbstractController
