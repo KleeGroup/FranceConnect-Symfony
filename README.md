@@ -1,3 +1,7 @@
+> [!CAUTION]
+> This repo has been archived and contains obsolete code.
+> KleeGroup does not use this code anymore and won't be maintaining this repository.
+
 FranceConnect-Symfony
 =====================================
 
